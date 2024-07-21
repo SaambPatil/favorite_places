@@ -11,6 +11,9 @@ final colorScheme = ColorScheme.fromSeed(
   background: const Color.fromARGB(255, 56, 49, 66),
 );
 
+
+
+
 final theme = ThemeData().copyWith(
   scaffoldBackgroundColor: colorScheme.surface,
   colorScheme: colorScheme,
