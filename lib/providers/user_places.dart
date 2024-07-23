@@ -1,7 +1,6 @@
-import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:io';
 import 'package:favorite_places/models/place.dart';
 import 'package:path_provider/path_provider.dart' as syspaths;
 import 'package:path/path.dart' as path;
@@ -17,7 +16,7 @@ Future<Database> _getDatabase() async {
     ),
     onCreate: (db, version) {
       return db.execute(
-        'CREATE TABLE user_places(id TEXT PRIMARY KEY , title TEXT,image TEXT),lat REAL ,lng REAL,address TEXT',
+        'CREATE TABLE user_places(id TEXT PRIMARY KEY, title TEXT, image TEXT)',
       );
     },
     version: 1,
@@ -37,11 +36,6 @@ class UserPlacesNotifier extends StateNotifier<List<Place>> {
             id: row['id'] as String,
             title: row['title'] as String,
             image: File(row['image'] as String),
-            location: PlaceLocation(
-              latitude: row['lat'] as double,
-              longitude: row['lng'] as double,
-              address: row['address'] as String,
-            ),
           ),
         )
         .toList();
@@ -49,15 +43,15 @@ class UserPlacesNotifier extends StateNotifier<List<Place>> {
     state = places;
   }
 
-  void addPlace(String title, File image, PlaceLocation location) async {
+  void addPlace(String title, File image) async {
     final appDir = await syspaths.getApplicationDocumentsDirectory();
     final fileName = path.basename(image.path);
     final copiedImage = await image.copy('${appDir.path}/$fileName');
 
     final newPlace = Place(
+      id: DateTime.now().toString(), // Generate a unique id
       title: title,
       image: copiedImage,
-      location: location,
     );
 
     final db = await _getDatabase();
@@ -68,9 +62,6 @@ class UserPlacesNotifier extends StateNotifier<List<Place>> {
         'id': newPlace.id,
         'title': newPlace.title,
         'image': newPlace.image.path,
-        'lat': newPlace.location.latitude,
-        'lng': newPlace.location.longitude,
-        'address': newPlace.location.address,
       },
     );
 
